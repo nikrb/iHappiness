@@ -42,6 +42,14 @@ class FaceView: UIView {
     // it means the pointer should not be used to keep it in memory
     weak var dataSource: FaceViewDataSource?
     
+    func scale( gesture: UIPinchGestureRecognizer){
+        if gesture.state == .Changed {
+            scale *= gesture.scale
+            // only get the scale change each time
+            gesture.scale = 1
+        }
+    }
+    
     override func drawRect(rect: CGRect) {
         let facePath = UIBezierPath(arcCenter: faceCentre, radius: faceRadius, startAngle: 0, endAngle: CGFloat( 2*M_PI), clockwise: true)
         facePath.lineWidth = lineWidth

@@ -10,12 +10,6 @@ import UIKit
 
 class HappinessViewController: UIViewController, FaceViewDataSource {
     
-    @IBOutlet weak var faceView: FaceView! {
-        didSet {
-            faceView.dataSource = self
-        }
-    }
-    
     var happiness: Int = 100 { // 0= very sad, 100- ecstatic
         didSet{
             happiness = min( max( happiness, 0), 100)
@@ -23,6 +17,35 @@ class HappinessViewController: UIViewController, FaceViewDataSource {
             updateUI()
         }
     }
+    private struct Constants {
+        static let HappinessGestureScale: CGFloat = 4
+    }
+    
+    @IBOutlet weak var faceView: FaceView! {
+        didSet {
+            faceView.dataSource = self
+            // note the colon after action param
+            faceView.addGestureRecognizer( UIPinchGestureRecognizer(target: faceView, action: "scale:"))
+            // one way to add the pan gesture, note target self as controller handles change to model
+            // faceView.addGestureRecognizer( UIPanGestureRecognizer(target: self, action: "changeHappiness:"))
+            // the other way, from storyboard is below
+        }
+    }
+    
+    @IBAction func changeHappiness(gesture: UIPanGestureRecognizer) {
+        switch gesture.state {
+        case .Ended: fallthrough
+        case .Changed:
+            let translation = gesture.translationInView(faceView)
+            let happinessChange = -Int( translation.y / Constants.HappinessGestureScale)
+            if happinessChange != 0 {
+                happiness += happinessChange
+                gesture.setTranslation(CGPointZero, inView: faceView)
+            }
+        default: break
+        }
+    }
+    
     private func updateUI(){
         faceView.setNeedsDisplay()
     }
